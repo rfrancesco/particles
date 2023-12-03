@@ -12,6 +12,7 @@ This is just a very simple first step towards a classical mechanics engine. Some
 ### Physics
 - [ ] Faster collisions using Quadtrees
 - [ ] Adding masses and generic forces (e.g. gravity and springs). For now, the only force is a global uniform gravity field.
+- [ ] Parallelizing some parts with OpenMP
 
 ### Maybe for a different project
 - [ ] Rigid bodies: this requires a more sophisticated collision engine. 
