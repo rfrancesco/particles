@@ -1,0 +1,1 @@
+add_library(Game Game.cpp Graphics.cpp Input.cpp GameLoopTimer.cpp Physics.cpp Vector2.cpp)
