@@ -3,6 +3,7 @@
 
 #include <SDL2/SDL.h>
 #include <unordered_map>
+#include "Vector2.hpp"
 
 /* Input class
  * Allows keeping track of keyboard events
@@ -18,15 +19,22 @@
 class Input
 {
     public:
+        Input() : quitStatus{false}, windowResizeStatus{false} {};
+        void pollInputEvents();
+        bool wasQuitRequested();
+        bool wasWindowResized();
+        Vector2 getWASD();
+        bool isWASDHeld();
+
+    private:
         void beginNewFrame();
         void keyUpEvent(const SDL_Event& event);
         void keyDownEvent(const SDL_Event& event);
 
+        bool quitStatus, windowResizeStatus;
         bool wasKeyPressed(SDL_Scancode key);
         bool wasKeyReleased(SDL_Scancode key);
         bool isKeyHeld(SDL_Scancode key);
-
-    private:
         std::unordered_map<SDL_Scancode, bool> heldKeys;
         std::unordered_map<SDL_Scancode, bool> pressedKeys;
         std::unordered_map<SDL_Scancode, bool> releasedKeys;      

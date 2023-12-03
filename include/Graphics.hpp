@@ -11,7 +11,7 @@
 
 struct Color
 {
-    unsigned int r,g,b;
+    unsigned int r,g,b,a;
 };
 
 class Graphics
@@ -23,7 +23,6 @@ class Graphics
         void set_bg_color(Color color);
         void clear_window();
         void rectangle(int x, int y, int w, int h);
-        void emptyCircle(int x_center, int y_center, int radius);
         void circle(int x_center, int y_center, int radius, Color color);
         void render();
 
