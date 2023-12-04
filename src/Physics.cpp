@@ -92,6 +92,10 @@ void PhysicsEngine::resolveTwoBodyCollisions(std::vector<GameObject>& objects)
             double min_distance = objects[i].r + objects[j].r;
             double real_distance = dp.norm();
 
+            /* Division by zero makes particles disappear into NaN */
+            if (real_distance==0)
+                real_distance=0.1;
+
             double overlap_x = dp.x/real_distance;
             double overlap_y = dp.y/real_distance;
 
