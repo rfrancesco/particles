@@ -19,7 +19,7 @@
 class Input
 {
     public:
-        Input() : quitStatus{false}, windowResizeStatus{false} {};
+        Input();
         void pollInputEvents();
         bool wasQuitRequested();
         bool wasWindowResized();

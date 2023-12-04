@@ -1,5 +1,12 @@
 #include "Input.hpp"
+#include "SDLManager.hpp"
 #include <iostream>
+
+Input::Input()
+    : quitStatus{false}, windowResizeStatus{false}
+{
+    SDLManager::initSDLIfNotYetInitialized();
+}
 
 void Input::pollInputEvents()
 {

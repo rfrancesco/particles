@@ -4,24 +4,16 @@
 #include "Input.hpp"
 #include "GameLoopTimer.hpp"
 
-#include <SDL2/SDL.h>
 #include <algorithm>
 #include "Physics.hpp"
 
 Game::Game()
 {
-    if (SDL_Init(SDL_INIT_EVERYTHING) < 0)
-    {
-        std::cerr << "Game: Cannot initialize SDL2!" << std::endl;
-        exit(EXIT_FAILURE);
-    }
-
     gameLoop();
 }
 
 Game::~Game()
 {
-    SDL_Quit();
 }
 
 void Game::gameLoop()

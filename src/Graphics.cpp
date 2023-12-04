@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include "Graphics.hpp"
+#include "SDLManager.hpp"
 
 
 static void if_true_crash(bool test, std::string msg)
@@ -16,6 +17,7 @@ static void if_true_crash(bool test, std::string msg)
 
 Graphics::Graphics()
 {
+    SDLManager::initSDLIfNotYetInitialized();
     Uint32 window_flags = SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL;
     window = SDL_CreateWindow("Particles!", SDL_WINDOWPOS_CENTERED,SDL_WINDOWPOS_CENTERED,
                     640,480,window_flags);
