@@ -1,8 +1,6 @@
 #ifndef FRAMETIMER_HPP
 #define FRAMETIMER_HPP
 
-#include <SDL2/SDL.h>
-
 /* GameLoopTimer class
  * Times frames for the rendering and physics engine
  *
