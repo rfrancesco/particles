@@ -25,13 +25,13 @@ void Game::gameLoop()
     PhysicsEngine physics;
     double dt;
 
-    for (int i=0; i<50; i++)
+    for (int i=0; i<500; i++)
     {
         objects.push_back(GameObject());
         objects[i].pos = {300+rand()%100, 100+rand()%100};
         objects[i].velocity = {rand()%100-50, 0.0};
         objects[i].force = {0.0,0.0};
-        objects[i].r = 12;
+        objects[i].r = 4;
     }
 
     (void) frametimer.get_physics_dt();
@@ -41,7 +41,7 @@ void Game::gameLoop()
         input.pollInputEvents();
         running = !(input.wasQuitRequested());
         
-        dt = frametimer.get_physics_dt();
+
         Vector2 delta = input.getWASD();
 
         objects[0].pos.x += 5*delta.x;
@@ -56,6 +56,7 @@ void Game::gameLoop()
             objects[0].velocity.y = 0.3f*delta.y/dt;
         }
 
+        dt = frametimer.get_physics_dt();
         physics.computeForces(objects);
         physics.evolveObjects(objects,dt, graphics.get_width(), graphics.get_height());
         frametimer.end();
@@ -74,6 +75,7 @@ void Game::draw(Graphics& graphics)
 {   
     graphics.clear_window();
 
+    // std::cout << "Objects" << std::endl;
     for (auto& object : objects)
     {
         Color color;
@@ -85,6 +87,7 @@ void Game::draw(Graphics& graphics)
         if (object.locked)
             color.b=180;
 
+        // std::cout << object.pos.x << "\t" << object.pos.y << std::endl;
         graphics.circle(object.pos.x, object.pos.y, object.r, color);
     }
     
