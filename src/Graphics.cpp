@@ -20,7 +20,7 @@ Graphics::Graphics()
     SDLManager::initSDLIfNotYetInitialized();
     Uint32 window_flags = SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL;
     window = SDL_CreateWindow("Particles!", SDL_WINDOWPOS_CENTERED,SDL_WINDOWPOS_CENTERED,
-                    640,480,window_flags);
+                    300,300,window_flags);
     if_true_crash(!window, "Could not create SDL Window!");
     renderer = SDL_CreateRenderer(window,-1,SDL_RENDERER_ACCELERATED);
     if_true_crash(!renderer, "Could not create SDL Renderer!");

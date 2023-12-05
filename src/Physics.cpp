@@ -3,14 +3,48 @@
 #include <map>
 #include <vector>
 #include <algorithm>
+# define M_PI           3.14159265358979323846
 
 const double ax_g = 0;
 const double ay_g = 500;
 
 const double slowdown = 1.0;
 
-const double wall_collision_energy_loss_n = 0.99;
-const double wall_collision_energy_loss_p = 0.99999;
+const double wall_collision_energy_loss_n = 1.0; //0.99;
+const double wall_collision_energy_loss_p = 1.0; //0.99999;
+
+void PhysicsEngine::setWorldBox(int width, int height)
+{
+    world.width = width;
+    world.height = height;
+    world.area = width*height;
+}
+
+double PhysicsEngine::getPressure() const
+{
+    return pressure;
+}
+
+double PhysicsEngine::getArea() const
+{
+    return world.area;
+}
+
+double PhysicsEngine::getVanDerWaalsArea(const std::vector<GameObject> &objects) const
+{
+    double a = world.area;
+    for (const auto &o : objects)
+        a -= M_PI*o.r*o.r;
+    return a;
+}
+
+double PhysicsEngine::getTotalKineticEnergy(const std::vector<GameObject> &objects) const
+{
+    double K = 0.0;
+    for (const auto& o : objects)
+        K += 0.5*o.velocity.normSquared();
+    return K;
+}
 
 void PhysicsEngine::computeForces(std::vector<GameObject> &objects)
 {
@@ -36,46 +70,54 @@ void PhysicsEngine::evolve_object(GameObject &obj, double dt)
     // std::cout << obj.velocity.x <<  " " << obj.velocity.y << " " << obj.kineticEnergy() << std::endl;
 }
 
-void PhysicsEngine::evolveObjects(std::vector<GameObject> &objects, double dt, int width, int height)
+void PhysicsEngine::evolveObjects(std::vector<GameObject> &objects, double dt)
 {
     const int n_order = 3;
     dt *= slowdown;
     const double eps = dt / n_order;
+
+    impulseOnBox=0.0;
     for (int i = 0; i < n_order; i++)
     {
         for (auto &obj : objects)
             evolve_object(obj, eps);
-        resolveWallCollisions(objects, width, height);
-        resolveTwoBodyCollisions_naive(objects, width, height);
+        resolveWallCollisions(objects);
+        resolveTwoBodyCollisions_naive(objects);
     }
+    pressure = 2*(impulseOnBox/dt)/(world.width + world.height);
 }
 
-void PhysicsEngine::resolveWallCollisions(std::vector<GameObject> &objects, int width, int height)
+void PhysicsEngine::resolveWallCollisions(std::vector<GameObject> &objects)
 {
     for (auto &object : objects)
     {
 
+        /* TODO: replace fabs with appropriate signs */
         if ((object.pos.x - object.r) <= 0)
         {
             object.pos.x = object.r;
+            impulseOnBox+= (1.0 + wall_collision_energy_loss_n) * fabs(object.velocity.x);
             object.velocity.x = -wall_collision_energy_loss_n * object.velocity.x;
             object.velocity.y = wall_collision_energy_loss_p * object.velocity.y;
         }
         if ((object.pos.y - object.r) <= 0)
         {
             object.pos.y = object.r;
+            impulseOnBox+= (1.0 + wall_collision_energy_loss_n) * fabs(object.velocity.y);
             object.velocity.x = wall_collision_energy_loss_p * object.velocity.x;
             object.velocity.y = -wall_collision_energy_loss_n * object.velocity.y;
         }
-        if ((object.pos.x + object.r) >= width)
+        if ((object.pos.x + object.r) >= world.width)
         {
-            object.pos.x = width - object.r;
+            object.pos.x = world.width - object.r;
+            impulseOnBox+= (1.0 + wall_collision_energy_loss_n) * fabs(object.velocity.y);
             object.velocity.x = -wall_collision_energy_loss_n * object.velocity.x;
             object.velocity.y = wall_collision_energy_loss_p * object.velocity.y;
         }
-        if ((object.pos.y + object.r) >= height)
+        if ((object.pos.y + object.r) >= world.height)
         {
-            object.pos.y = height - object.r;
+            object.pos.y = world.height - object.r;
+            impulseOnBox+= (1.0 + wall_collision_energy_loss_n) * fabs(object.velocity.x);
             object.velocity.x = wall_collision_energy_loss_p * object.velocity.x;
             object.velocity.y = -wall_collision_energy_loss_n * object.velocity.y;
         }
@@ -110,21 +152,21 @@ bool cmp(const GameObject &a, const GameObject &b)
 /* TODO: Stop passing width and height around!
          Set up a proper PhysicsEngine::World
          with height, width and its own Particle registry */
-void PhysicsEngine::resolveTwoBodyCollisions_spatialHashing(std::vector<GameObject> &objects, int width, int height)
+void PhysicsEngine::resolveTwoBodyCollisions_spatialHashing(std::vector<GameObject> &objects)
 {
     /* Prepare hashgrid */
     std::map<int, std::vector<GameObject *>> grid; /* Maybe multimap makes more sense */
     for (int i = 0; i < objects.size(); i++)
     {
         Vector2 &position = objects[i].pos;
-        grid[hash(position.x, position.y, width, height)].push_back(&objects[i]);
+        grid[hash(position.x, position.y, world.width, world.height)].push_back(&objects[i]);
     }
 
     if (size == 0)
         size = (*std::max_element(objects.begin(), objects.end(), cmp)).r;
 
-    int look_ahead_x = std::max(size / (width / n_cells_x), 1);
-    int look_ahead_y = std::max(size / (height / n_cells_y), 1);
+    int look_ahead_x = std::max(size / (world.width / n_cells_x), 1);
+    int look_ahead_y = std::max(size / (world.height / n_cells_y), 1);
 
     for (int r = 0; r < n_cells_x; r++)
         for (int c = 0; c < n_cells_y; c++)
@@ -175,7 +217,7 @@ void PhysicsEngine::resolveTwoBodyCollisions_spatialHashing(std::vector<GameObje
         }
 }
 
-void PhysicsEngine::resolveTwoBodyCollisions_naive(std::vector<GameObject> &objects, int width, int height)
+void PhysicsEngine::resolveTwoBodyCollisions_naive(std::vector<GameObject> &objects)
 {
     /* Naive O(n^2) implementation */
 
