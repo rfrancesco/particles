@@ -4,6 +4,8 @@ A simple 2D point particle simulator, written for fun in C++ / SDL.
 All particles live inside the window borders, colliding both with the walls and with each other. The window can be resized!
 
 ## Build
+Requires SDL2. Make sure to also install the corresponding `-devel` (or similar) packages available for your OS.
+
 ```
 mkdir build
 cd build
