@@ -70,7 +70,6 @@ void Input::keyDownEvent(const SDL_Event &event)
     {
         pressedKeys[event.key.keysym.scancode] = true;
         heldKeys[event.key.keysym.scancode] = true;
-        std::cout << "Pressed key!" << std::endl;
     }
 }
 
@@ -78,8 +77,6 @@ void Input::keyUpEvent(const SDL_Event &event)
 {
     releasedKeys[event.key.keysym.scancode] = true;
     heldKeys[event.key.keysym.scancode] = false;
-
-    std::cout << "Released key!" << std::endl;
 }
 
 bool Input::wasKeyPressed(SDL_Scancode key)
