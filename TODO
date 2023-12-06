@@ -8,3 +8,6 @@
     - Configurable Collision detection algorithms (e.g. by composition of an AbstractCollisionEngine::Naive/SpatialHashing/QuadTree)
     - Physics engine should be separate from the rest of the code, and have its own namespace
     - Get rid of static variables!
+
+- Vector2:
+    - It's ridiculous to have a Vector class without overloading!
