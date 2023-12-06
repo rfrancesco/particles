@@ -32,9 +32,11 @@ double PhysicsEngine::getArea() const
 
 double PhysicsEngine::getVanDerWaalsArea(const std::vector<GameObject> &objects) const
 {
+    /* Double check that this makes sense...
+       At low densities the factor is irrelevant anyway, but at large densities? */
     double a = world.area;
     for (const auto &o : objects)
-        a -= M_PI * o.r * o.r;
+        a -= 2 * M_PI * o.r * o.r;
     return a;
 }
 
