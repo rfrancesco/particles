@@ -98,6 +98,12 @@ void Game::gameLoop()
             vpa.push_back(pressurearea / 1.e7);
             vp.push_back(pressure / 1e2);
             va.push_back(area / 1e5);
+            if (vpa.size() > 1000)
+            {
+                vpa.erase(vpa.begin());
+                vp.erase(vp.begin());
+                va.erase(va.begin());
+            }
             std::vector<std::vector<float>> plots;
             plots.push_back(vpa);
             plots.push_back(vp);
