@@ -32,8 +32,6 @@ Graphics::Graphics()
     window_surface = SDL_GetWindowSurface(window);
     if_true_crash(!window_surface, "Could not get SDL Surface from main window");
     set_bg_color({255, 201, 211, 255});
-    SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "2");
-    SDL_SetHint(SDL_HINT_RENDER_VSYNC, "2");
     clear_window();
     render();
 
