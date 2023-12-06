@@ -43,7 +43,7 @@ void Game::gameLoop()
     (void)frametimer.get_physics_dt();
     while (running)
     {
-	count++;
+        count++;
         frametimer.start();
         input.pollInputEvents();
         running = !(input.wasQuitRequested());
@@ -70,44 +70,44 @@ void Game::gameLoop()
         frametimer.end();
         // std::cout << "Time for logic:" << frametimer.elapsed_time() << std::endl;
 
-	if (count > 200)
-	{
-		double pressure = physics.getPressure();
-		double area = physics.getVanDerWaalsArea(objects);
-		p.push_back(pressure);
-		a.push_back(area);
-		pa.push_back(pressure*area);
-		ke.push_back(physics.getTotalKineticEnergy(objects));
+        if (count > 200)
+        {
+            double pressure = physics.getPressure();
+            double area = physics.getVanDerWaalsArea(objects);
+            p.push_back(pressure);
+            a.push_back(area);
+            pa.push_back(pressure * area);
+            ke.push_back(physics.getTotalKineticEnergy(objects));
 
-		pressure = std::accumulate(p.begin(), p.end(), 0.0)/p.size();
-		double pressurearea = std::accumulate(pa.begin(), pa.end(), 0.0)/pa.size();
-		double kinetic = std::accumulate(ke.begin(), ke.end(), 0.0)/ke.size();
-		area = std::accumulate(a.begin(), a.end(), 0.0)/a.size();
-		if (p.size() > 250)
-		{
-		    p.pop_front();
-		    a.pop_front();
-		    pa.pop_front();
-		    ke.pop_front();
-		}
-		std::cout 
-			  <<  "Thermodynamics:\tP = " << pressure
-			  << "\tA = " << area
-			  << "\tPA = " << pressurearea/1.e7 
-			  << "\tE = " << kinetic << "\t size=" << p.size() << std::endl;
-		vpa.push_back(pressurearea/1.e7 );
-		    vp.push_back(pressure/1e2);
-		va.push_back(area/1e5);
-		std::vector<std::vector<float>> plots;
-		plots.push_back(vpa);
-		plots.push_back(vp);
-		plots.push_back(va);
-		graphics.renderImGuiWindow(plots);
-	}
-	else
-		graphics.thermalizingImGuiWindow(count, 200);
-	draw(graphics);
-	
+            pressure = std::accumulate(p.begin(), p.end(), 0.0) / p.size();
+            double pressurearea = std::accumulate(pa.begin(), pa.end(), 0.0) / pa.size();
+            double kinetic = std::accumulate(ke.begin(), ke.end(), 0.0) / ke.size();
+            area = std::accumulate(a.begin(), a.end(), 0.0) / a.size();
+            if (p.size() > 250)
+            {
+                p.pop_front();
+                a.pop_front();
+                pa.pop_front();
+                ke.pop_front();
+            }
+            // std::cout
+            // 	  <<  "Thermodynamics:\tP = " << pressure
+            // 	  << "\tA = " << area
+            // 	  << "\tPA = " << pressurearea/1.e7
+            // 	  << "\tE = " << kinetic << "\t size=" << p.size() << std::endl;
+            vpa.push_back(pressurearea / 1.e7);
+            vp.push_back(pressure / 1e2);
+            va.push_back(area / 1e5);
+            std::vector<std::vector<float>> plots;
+            plots.push_back(vpa);
+            plots.push_back(vp);
+            plots.push_back(va);
+            graphics.renderImGuiWindow_plots(plots);
+        }
+        else
+            graphics.renderImGuiWindow_thermalization(count, 200);
+        draw(graphics);
+
         frametimer.end();
         // std::cout << "Time for logic+render:" << frametimer.elapsed_time() << std::endl;
         frametimer.capFPS(FPS);

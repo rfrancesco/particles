@@ -103,7 +103,7 @@ void Graphics::render()
 //     return out;
 // }
 
-void Graphics::thermalizingImGuiWindow(unsigned int count, unsigned int tot)
+void Graphics::renderImGuiWindow_thermalization(unsigned int count, unsigned int tot)
 {
 
     ImGui_ImplSDLRenderer2_NewFrame();
@@ -123,16 +123,13 @@ void Graphics::thermalizingImGuiWindow(unsigned int count, unsigned int tot)
 
     ImGui::End();
     ImGui::Render();
-    ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
     ImGui_ImplSDLRenderer2_RenderDrawData(ImGui::GetDrawData());
     SDL_RenderPresent(info_renderer);
 }
 
-static bool init = true;
-void Graphics::renderImGuiWindow(std::vector<std::vector<float>> &data)
+static bool show_init_popup = true;
+void Graphics::renderImGuiWindow_plots(std::vector<std::vector<float>> &data)
 {
-    /* TODO: It would be nice to be able to "stream" data into a plot... */
-    ImGuiIO &io = ImGui::GetIO();
     ImGui_ImplSDLRenderer2_NewFrame();
     ImGui_ImplSDL2_NewFrame();
 
@@ -143,7 +140,7 @@ void Graphics::renderImGuiWindow(std::vector<std::vector<float>> &data)
     SDL_GetWindowSize(info_window, &w, &h);
     vec = ImVec2{w, h};
     ImGui::SetNextWindowSize(vec);
-    ImGui::Begin("Plots"); // Create a window called "Hello, world!" and append into it.
+    ImGui::Begin("Plots");
 
     if (ImPlot::BeginPlot("Physical quantities"))
     {
@@ -182,12 +179,11 @@ void Graphics::renderImGuiWindow(std::vector<std::vector<float>> &data)
 
     ImGui::End();
 
-    if (init)
+    if (show_init_popup)
         ImGui::OpenPopup("Welcome");
 
     if (ImGui::BeginPopupModal("Welcome"))
     {
-        std::cout << init << std::endl;
         ImGui::Text("This is a simulation of a 2D ideal gas.\n"
                     "Feel free to resize the main simulation window, to change its volume.\n"
                     "Notice that, at equilibrium, PA = const!\n\n");
@@ -195,16 +191,13 @@ void Graphics::renderImGuiWindow(std::vector<std::vector<float>> &data)
                     "After resizing, just wait a few seconds for the system to settle down.");
         if (ImGui::Button("Ok!"))
         {
-            init = false;
+            show_init_popup = false;
             ImGui::CloseCurrentPopup();
         }
         ImGui::EndPopup();
     }
 
     ImGui::Render();
-    ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
-    // SDL_RenderSetScale(info_renderer, io.DisplayFramebufferScale.x, io.DisplayFramebufferScale.y);
-    // SDL_SetRenderDrawColor(info_renderer, (Uint8)(clear_color.x * 255), (Uint8)(clear_color.y * 255), (Uint8)(clear_color.z * 255), (Uint8)(clear_color.w * 255));
     ImGui_ImplSDLRenderer2_RenderDrawData(ImGui::GetDrawData());
     SDL_RenderPresent(info_renderer);
 }

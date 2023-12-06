@@ -2,7 +2,7 @@
 #include <SDL2/SDL.h>
 #include <iostream>
 
-SDLManager* SDLManager::singleton = nullptr;
+SDLManager *SDLManager::singleton = nullptr;
 
 SDLManager::SDLManager()
 {
@@ -26,7 +26,7 @@ void SDLManager::initSDLIfNotYetInitialized()
     }
 }
 
-SDLManager* SDLManager::getInstance()
+SDLManager *SDLManager::getInstance()
 {
     initSDLIfNotYetInitialized();
     return singleton;

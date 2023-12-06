@@ -8,7 +8,7 @@
  *
  *  */
 
-struct World 
+struct World
 {
     int width;
     int height;

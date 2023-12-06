@@ -6,14 +6,14 @@
 
 class GameObject
 {
-    public:
-        bool locked = false;
-        Vector2 pos;
-        Vector2 velocity;
-        Vector2 force;
-        Uint64 r=16;
+public:
+    bool locked = false;
+    Vector2 pos;
+    Vector2 velocity;
+    Vector2 force;
+    Uint64 r = 16;
 
-        double kineticEnergy() { return 0.5f*velocity.normSquared(); };
+    double kineticEnergy() { return 0.5f * velocity.normSquared(); };
 };
 
 #endif

@@ -7,14 +7,13 @@ class SDLManager
 protected:
     SDLManager();
     ~SDLManager();
-    static SDLManager* singleton;
+    static SDLManager *singleton;
 
 public:
-    SDLManager(SDLManager& other) = delete;
+    SDLManager(SDLManager &other) = delete;
     static void initSDLIfNotYetInitialized();
-    static SDLManager* getInstance();
-    void operator=(const SDLManager&) = delete;
-
+    static SDLManager *getInstance();
+    void operator=(const SDLManager &) = delete;
 };
 
 #endif

@@ -3,7 +3,7 @@
 
 double Vector2::normSquared() const
 {
-    return x*x + y*y;
+    return x * x + y * y;
 }
 
 double Vector2::norm() const

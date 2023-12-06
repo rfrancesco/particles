@@ -11,19 +11,19 @@
 
 class GameLoopTimer
 {
-    public:
-        GameLoopTimer() : t_start(0), t_end(0), t_physics_last(0), t_physics_now(0) {}; 
-        void start();
-        void end();
-        double elapsed_time();
-        void capFPS(Uint64 max_fps);
-        void logFPS() const;
-        double get_physics_dt();
+public:
+    GameLoopTimer() : t_start(0), t_end(0), t_physics_last(0), t_physics_now(0){};
+    void start();
+    void end();
+    double elapsed_time();
+    void capFPS(Uint64 max_fps);
+    void logFPS() const;
+    double get_physics_dt();
 
-    private:
-        Uint64 t_start, t_end;
-        Uint64 t_physics_last, t_physics_now;
-        float current_fps;
+private:
+    Uint64 t_start, t_end;
+    Uint64 t_physics_last, t_physics_now;
+    float current_fps;
 };
 
-#endif 
+#endif

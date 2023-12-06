@@ -14,7 +14,7 @@ void Input::pollInputEvents()
 {
     SDL_Event event;
     beginNewFrame();
-    while(SDL_PollEvent(&event))
+    while (SDL_PollEvent(&event))
     {
         ImGui_ImplSDL2_ProcessEvent(&event);
         if (event.type == SDL_KEYDOWN)
@@ -40,7 +40,7 @@ bool Input::wasWindowResized()
 
 Vector2 Input::getWASD()
 {
-    Vector2 delta = {0,0};
+    Vector2 delta = {0, 0};
     if (isKeyHeld(SDL_SCANCODE_W))
         delta.y -= 1;
     else if (isKeyHeld(SDL_SCANCODE_S))
@@ -55,10 +55,7 @@ Vector2 Input::getWASD()
 
 bool Input::isWASDHeld()
 {
-    return (isKeyHeld(SDL_SCANCODE_W) 
-            || isKeyHeld(SDL_SCANCODE_A) 
-            || isKeyHeld(SDL_SCANCODE_S) 
-            || isKeyHeld(SDL_SCANCODE_D));
+    return (isKeyHeld(SDL_SCANCODE_W) || isKeyHeld(SDL_SCANCODE_A) || isKeyHeld(SDL_SCANCODE_S) || isKeyHeld(SDL_SCANCODE_D));
 }
 
 void Input::beginNewFrame()
@@ -67,7 +64,7 @@ void Input::beginNewFrame()
     releasedKeys.clear();
 }
 
-void Input::keyDownEvent(const SDL_Event& event)
+void Input::keyDownEvent(const SDL_Event &event)
 {
     if (!event.key.repeat)
     {
@@ -77,7 +74,7 @@ void Input::keyDownEvent(const SDL_Event& event)
     }
 }
 
-void Input::keyUpEvent(const SDL_Event& event)
+void Input::keyUpEvent(const SDL_Event &event)
 {
     releasedKeys[event.key.keysym.scancode] = true;
     heldKeys[event.key.keysym.scancode] = false;
@@ -100,7 +97,6 @@ bool Input::wasKeyReleased(SDL_Scancode key)
     else
         return false;
 }
-
 
 bool Input::isKeyHeld(SDL_Scancode key)
 {

@@ -12,17 +12,17 @@
 
 class Game
 {
-    public:
-        Game();
-        ~Game();
-    private:
-        std::vector<GameObject> objects;
+public:
+    Game();
+    ~Game();
 
-        void gameLoop();
-        void draw(Graphics& graphics);
+private:
+    std::vector<GameObject> objects;
 
-        const int FPS = 60;
+    void gameLoop();
+    void draw(Graphics &graphics);
 
+    const int FPS = 60;
 };
 
 #endif
