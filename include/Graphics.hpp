@@ -27,6 +27,7 @@ class Graphics
         void circle(int x_center, int y_center, int radius, Color color);
         void render();
 
+	void thermalizingImGuiWindow(unsigned int count, unsigned int tot);
         void renderImGuiWindow(std::vector<std::vector<float>> &data);
 
         int get_width();

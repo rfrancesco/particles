@@ -3,21 +3,21 @@
 #include <map>
 #include <vector>
 #include <algorithm>
-# define M_PI           3.14159265358979323846
+#define M_PI 3.14159265358979323846
 
 const double ax_g = 0;
 const double ay_g = 500;
 
 const double slowdown = 1.0;
 
-const double wall_collision_energy_loss_n = 1.0; //0.99;
-const double wall_collision_energy_loss_p = 1.0; //0.99999;
+const double wall_collision_energy_loss_n = 1.0; // 0.99;
+const double wall_collision_energy_loss_p = 1.0; // 0.99999;
 
 void PhysicsEngine::setWorldBox(int width, int height)
 {
     world.width = width;
     world.height = height;
-    world.area = width*height;
+    world.area = width * height;
 }
 
 double PhysicsEngine::getPressure() const
@@ -34,15 +34,15 @@ double PhysicsEngine::getVanDerWaalsArea(const std::vector<GameObject> &objects)
 {
     double a = world.area;
     for (const auto &o : objects)
-        a -= M_PI*o.r*o.r;
+        a -= M_PI * o.r * o.r;
     return a;
 }
 
 double PhysicsEngine::getTotalKineticEnergy(const std::vector<GameObject> &objects) const
 {
     double K = 0.0;
-    for (const auto& o : objects)
-        K += 0.5*o.velocity.normSquared();
+    for (const auto &o : objects)
+        K += 0.5 * o.velocity.normSquared();
     return K;
 }
 
@@ -76,7 +76,7 @@ void PhysicsEngine::evolveObjects(std::vector<GameObject> &objects, double dt)
     dt *= slowdown;
     const double eps = dt / n_order;
 
-    impulseOnBox=0.0;
+    impulseOnBox = 0.0;
     for (int i = 0; i < n_order; i++)
     {
         for (auto &obj : objects)
@@ -84,7 +84,7 @@ void PhysicsEngine::evolveObjects(std::vector<GameObject> &objects, double dt)
         resolveWallCollisions(objects);
         resolveTwoBodyCollisions_naive(objects);
     }
-    pressure = 2*(impulseOnBox/dt)/(world.width + world.height);
+    pressure = 2 * (impulseOnBox / dt) / (world.width + world.height);
 }
 
 void PhysicsEngine::resolveWallCollisions(std::vector<GameObject> &objects)
@@ -96,28 +96,28 @@ void PhysicsEngine::resolveWallCollisions(std::vector<GameObject> &objects)
         if ((object.pos.x - object.r) <= 0)
         {
             object.pos.x = object.r;
-            impulseOnBox+= (1.0 + wall_collision_energy_loss_n) * fabs(object.velocity.x);
+            impulseOnBox += (1.0 + wall_collision_energy_loss_n) * fabs(object.velocity.x);
             object.velocity.x = -wall_collision_energy_loss_n * object.velocity.x;
             object.velocity.y = wall_collision_energy_loss_p * object.velocity.y;
         }
         if ((object.pos.y - object.r) <= 0)
         {
             object.pos.y = object.r;
-            impulseOnBox+= (1.0 + wall_collision_energy_loss_n) * fabs(object.velocity.y);
+            impulseOnBox += (1.0 + wall_collision_energy_loss_n) * fabs(object.velocity.y);
             object.velocity.x = wall_collision_energy_loss_p * object.velocity.x;
             object.velocity.y = -wall_collision_energy_loss_n * object.velocity.y;
         }
         if ((object.pos.x + object.r) >= world.width)
         {
             object.pos.x = world.width - object.r;
-            impulseOnBox+= (1.0 + wall_collision_energy_loss_n) * fabs(object.velocity.y);
+            impulseOnBox += (1.0 + wall_collision_energy_loss_n) * fabs(object.velocity.y);
             object.velocity.x = -wall_collision_energy_loss_n * object.velocity.x;
             object.velocity.y = wall_collision_energy_loss_p * object.velocity.y;
         }
         if ((object.pos.y + object.r) >= world.height)
         {
             object.pos.y = world.height - object.r;
-            impulseOnBox+= (1.0 + wall_collision_energy_loss_n) * fabs(object.velocity.x);
+            impulseOnBox += (1.0 + wall_collision_energy_loss_n) * fabs(object.velocity.x);
             object.velocity.x = wall_collision_energy_loss_p * object.velocity.x;
             object.velocity.y = -wall_collision_energy_loss_n * object.velocity.y;
         }

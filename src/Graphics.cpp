@@ -24,36 +24,37 @@ Graphics::Graphics()
 {
     SDLManager::initSDLIfNotYetInitialized();
     Uint32 window_flags = SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL;
-    window = SDL_CreateWindow("Particles!", SDL_WINDOWPOS_CENTERED,SDL_WINDOWPOS_CENTERED,
-                    300,300,window_flags);
+    window = SDL_CreateWindow("Particles!", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+                              300, 300, window_flags);
     if_true_crash(!window, "Could not create SDL Window!");
-    renderer = SDL_CreateRenderer(window,-1,SDL_RENDERER_ACCELERATED);
+    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
     if_true_crash(!renderer, "Could not create SDL Renderer!");
     window_surface = SDL_GetWindowSurface(window);
-    if_true_crash(!window_surface,"Could not get SDL Surface from main window");
-    set_bg_color({255,201,211,255});
-    SDL_SetHint( SDL_HINT_RENDER_SCALE_QUALITY, "2"  );
-    SDL_SetHint( SDL_HINT_RENDER_VSYNC, "2"  );
+    if_true_crash(!window_surface, "Could not get SDL Surface from main window");
+    set_bg_color({255, 201, 211, 255});
+    SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "2");
+    SDL_SetHint(SDL_HINT_RENDER_VSYNC, "2");
     clear_window();
     render();
 
-    info_window = SDL_CreateWindow("Particles!", SDL_WINDOWPOS_UNDEFINED,SDL_WINDOWPOS_UNDEFINED,
-                    600,650,window_flags);
+    info_window = SDL_CreateWindow("Particles!", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+                                   600, 650, window_flags);
     if_true_crash(!info_window, "Could not create SDL Window!");
-    info_renderer = SDL_CreateRenderer(info_window,-1,SDL_RENDERER_ACCELERATED);
+    info_renderer = SDL_CreateRenderer(info_window, -1, SDL_RENDERER_ACCELERATED);
     if_true_crash(!info_renderer, "Could not create SDL Renderer!");
 
     int x, y, w, h;
-    SDL_GetWindowPosition(window,&x,&y);
+    SDL_GetWindowPosition(window, &x, &y);
     SDL_GetWindowSize(window, &w, &h);
-    SDL_SetWindowPosition(window, x-w, y);
+    SDL_SetWindowPosition(window, x - w, y);
     SDL_SetWindowPosition(info_window, x, y);
 
     ImGui::CreateContext();
     ImPlot::CreateContext();
-    ImGuiIO& io = ImGui::GetIO(); (void)io;
-    //io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+    ImGuiIO &io = ImGui::GetIO();
+    (void)io;
+    // io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad; // Enable Gamepad Controls
 
     // Setup Dear ImGui style
     ImGui::StyleColorsDark();
@@ -83,65 +84,99 @@ void Graphics::render()
     SDL_RenderPresent(renderer);
 }
 
-static std::vector<float> smooth(const std::vector<float> &in, unsigned int n)
-{
-    std::vector<float> out(in.size());
-    for (size_t i=0; i<in.size(); ++i)
-    {
-        size_t r = (i+n) < in.size() ? i+n : in.size()-1;
-        size_t l = ((i-n) < r) ? (i-n) : 0;    // size_t is unsigned!
-        size_t diff = r-l;
+// static std::vector<float> smooth(const std::vector<float> &in, unsigned int n)
+// {
+//     std::vector<float> out(in.size());
+//     for (size_t i = 0; i < in.size(); ++i)
+//     {
+//         size_t r = (i + n) < in.size() ? i + n : in.size() - 1;
+//         size_t l = ((i - n) < r) ? (i - n) : 0; // size_t is unsigned!
+//         size_t diff = r - l;
 
-        float avg = 0.;
-        for (;l<r;++l)
-            avg += in[r];
-        
-        out[i] = avg / diff;
-    }
-    std::cout << out[out.size()-1] <<std::endl;
-    return out;
-}
+//         float avg = 0.;
+//         for (; l < r; ++l)
+//             avg += in[r];
 
-static bool init=true;
-void Graphics::renderImGuiWindow(std::vector<std::vector<float>> &data)
+//         out[i] = avg / diff;
+//     }
+//     std::cout << out[out.size() - 1] << std::endl;
+//     return out;
+// }
+
+void Graphics::thermalizingImGuiWindow(unsigned int count, unsigned int tot)
 {
-    /* TODO: It would be nice to be able to "stream" data into a plot... */
-    ImGuiIO& io = ImGui::GetIO(); 
+
     ImGui_ImplSDLRenderer2_NewFrame();
     ImGui_ImplSDL2_NewFrame();
 
     ImGui::NewFrame();
-    ImVec2 vec {0,0};
+
+    ImGui::Begin("Plots");
+    ImGui::OpenPopup("Thermalizing");
+
+    if (ImGui::BeginPopupModal("Thermalizing"))
+    {
+        ImGui::Text("Waiting for the system to settle down...");
+        ImGui::ProgressBar(static_cast<float>(count) / tot);
+        ImGui::EndPopup();
+    }
+
+    ImGui::End();
+    ImGui::Render();
+    ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+    ImGui_ImplSDLRenderer2_RenderDrawData(ImGui::GetDrawData());
+    SDL_RenderPresent(info_renderer);
+}
+
+static bool init = true;
+void Graphics::renderImGuiWindow(std::vector<std::vector<float>> &data)
+{
+    /* TODO: It would be nice to be able to "stream" data into a plot... */
+    ImGuiIO &io = ImGui::GetIO();
+    ImGui_ImplSDLRenderer2_NewFrame();
+    ImGui_ImplSDL2_NewFrame();
+
+    ImGui::NewFrame();
+    ImVec2 vec{0, 0};
     ImGui::SetNextWindowPos(vec);
     int w, h;
-    SDL_GetWindowSize(info_window,&w, &h);
-    vec = ImVec2{w,h};
+    SDL_GetWindowSize(info_window, &w, &h);
+    vec = ImVec2{w, h};
     ImGui::SetNextWindowSize(vec);
-    ImGui::Begin("Plots");                        // Create a window called "Hello, world!" and append into it.
-    
+    ImGui::Begin("Plots"); // Create a window called "Hello, world!" and append into it.
 
-    if (ImPlot::BeginPlot("Physical quantities")) 
-    {    
+    if (ImPlot::BeginPlot("Physical quantities"))
+    {
         ImPlot::SetupAxisLimits(ImAxis_X1, 0, data[0].size(), ImPlotCond_Always);
-        ImPlot::SetupAxisLimits(ImAxis_Y1, 0, 1, ImPlotCond_Always);
+        ImPlot::SetupAxisLimits(ImAxis_Y1, 0, 2, ImPlotCond_Always);
         std::vector<float> x(data[0].size());
         std::iota(x.begin(), x.end(), 1);
+        ImPlot::SetupAxis(ImAxis_X1, "Time [frames]");
+        ImPlot::SetupAxis(ImAxis_Y1, "[a.u.]");
         ImPlot::PlotLine("PA", x.data(), data[0].data(), data[0].size());
-        std::vector<float> smoothed = smooth(data[0],200);
-        ImPlot::PlotLine("PA (smoothed)", x.data(), smoothed.data(), smoothed.size());
+        // std::vector<float> smoothed = smooth(data[0],200);
+        // ImPlot::PlotLine("PA (smoothed)", x.data(), smoothed.data(), smoothed.size());
         std::iota(x.begin(), x.end(), 1);
         ImPlot::PlotLine("P", x.data(), data[1].data(), data[1].size());
         ImPlot::EndPlot();
     }
 
-    if (ImPlot::BeginPlot("P-A")) 
+    if (ImPlot::BeginPlot("P-A"))
     {
         ImPlot::SetupAxis(ImAxis_X1, "Area");
-        ImPlot::SetupAxisLimits(ImAxis_X1, 0, 2, ImPlotCond_Always);
+        ImPlot::SetupAxisLimits(ImAxis_X1, 0, *std::max_element(data[2].begin(), data[2].end()) * 2., ImPlotCond_Always);
         ImPlot::SetupAxis(ImAxis_Y1, "Pressure");
-        ImPlot::SetupAxisLimits(ImAxis_Y1, 0, 3);
-        ImPlot::PlotScatter("P-A", data[2].data(), data[1].data(), data[1].size());
+        ImPlot::SetupAxisLimits(ImAxis_Y1, 0, *std::max_element(data[1].begin(), data[1].end()) * 2., ImPlotCond_Always);
+        ImPlot::PlotScatter("History", data[2].data(), data[1].data(), data[1].size());
         ImPlot::PlotScatter("You are here", data[2].data() + data[2].size() - 1, data[1].data() + data[1].size() - 1, 1);
+        float current_PA = data[2][data[2].size() - 1] * data[1][data[1].size() - 1];
+        std::vector<float> xx, yy;
+        for (float x = 0.1; x < *std::max_element(data[2].begin(), data[2].end()) * 2.; x += 0.01)
+        {
+            xx.push_back(x);
+            yy.push_back(current_PA / x);
+        }
+        ImPlot::PlotLine("Model", xx.data(), yy.data(), yy.size());
         ImPlot::EndPlot();
     }
 
@@ -149,15 +184,15 @@ void Graphics::renderImGuiWindow(std::vector<std::vector<float>> &data)
 
     if (init)
         ImGui::OpenPopup("Welcome");
-    
+
     if (ImGui::BeginPopupModal("Welcome"))
     {
         std::cout << init << std::endl;
         ImGui::Text("This is a simulation of a 2D ideal gas.\n"
                     "Feel free to resize the main simulation window, to change its volume.\n"
-                    "Notice that (roughly) PA = const!\n\n"
-                    "Remember to let the system settle for a little while after resizing.\n"
-                    "Small volumes can lead to deviations from the ideal gas law.");
+                    "Notice that, at equilibrium, PA = const!\n\n");
+        ImGui::Text("Remember that resizing the window brings the system out of equilibrium.\n"
+                    "After resizing, just wait a few seconds for the system to settle down.");
         if (ImGui::Button("Ok!"))
         {
             init = false;
@@ -176,15 +211,15 @@ void Graphics::renderImGuiWindow(std::vector<std::vector<float>> &data)
 
 int Graphics::get_width()
 {
-    int w,h;
-    SDL_GetWindowSize(window,&w,&h);
+    int w, h;
+    SDL_GetWindowSize(window, &w, &h);
     return w;
 }
 
 int Graphics::get_height()
 {
-    int w,h;
-    SDL_GetWindowSize(window,&w,&h);
+    int w, h;
+    SDL_GetWindowSize(window, &w, &h);
     return h;
 }
 
@@ -196,23 +231,23 @@ void Graphics::handleWindowResize()
 
 void Graphics::circle(int x_center, int y_center, int radius, Color color)
 {
-    if (radius<=0)
+    if (radius <= 0)
         return;
 
-    SDL_SetRenderDrawColor(renderer,color.r,color.g,color.b,color.a);
+    SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
 
     std::vector<SDL_Point> points;
     for (int x = 0; x < radius * 2; x++)
     {
         for (int y = 0; y < radius * 2; y++)
         {
-            int dx = radius - x; 
-            int dy = radius - y; 
-            if ((dx*dx + dy*dy) <= (radius * radius))
+            int dx = radius - x;
+            int dy = radius - y;
+            if ((dx * dx + dy * dy) <= (radius * radius))
             {
-                points.push_back({x_center+dx,y_center+dy});
+                points.push_back({x_center + dx, y_center + dy});
             }
         }
     }
-    SDL_RenderDrawPoints( renderer, points.data(), points.size() );
+    SDL_RenderDrawPoints(renderer, points.data(), points.size());
 }
