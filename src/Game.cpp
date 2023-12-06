@@ -28,7 +28,7 @@ void Game::gameLoop()
     PhysicsEngine physics;
     double dt;
     std::deque<double> p, a, pa, ke;
-    std::vector<float> vpa, vp;
+    std::vector<float> vpa, vp, va;
 
     for (int i = 0; i < 100; i++)
     {
@@ -92,11 +92,13 @@ void Game::gameLoop()
                   << "\tPA = " << pressurearea/1.e7 
                   << "\tE = " << kinetic << "\t size=" << p.size() << std::endl;
         vpa.push_back(pressurearea/1.e7 );
-	vp.push_back(pressure/1e2);
+	    vp.push_back(pressure/1e2);
+        va.push_back(area/1e5);
         draw(graphics);
         std::vector<std::vector<float>> plots;
         plots.push_back(vpa);
         plots.push_back(vp);
+        plots.push_back(va);
         graphics.renderImGuiWindow(plots);
 
         frametimer.end();

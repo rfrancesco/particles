@@ -38,7 +38,7 @@ Graphics::Graphics()
     render();
 
     info_window = SDL_CreateWindow("Particles!", SDL_WINDOWPOS_UNDEFINED,SDL_WINDOWPOS_UNDEFINED,
-                    600,400,window_flags);
+                    600,650,window_flags);
     if_true_crash(!info_window, "Could not create SDL Window!");
     info_renderer = SDL_CreateRenderer(info_window,-1,SDL_RENDERER_ACCELERATED);
     if_true_crash(!info_renderer, "Could not create SDL Renderer!");
@@ -120,17 +120,28 @@ void Graphics::renderImGuiWindow(std::vector<std::vector<float>> &data)
     ImGui::Begin("Plots");                        // Create a window called "Hello, world!" and append into it.
     
 
-    if (ImPlot::BeginPlot("Physical quantities")) {
-       
-            ImPlot::SetupAxisLimits(ImAxis_X1, 0, data[0].size(), ImPlotCond_Always);
-            ImPlot::SetupAxisLimits(ImAxis_Y1, 0, 1);
-            std::vector<float> x(data[0].size());
-            std::iota(x.begin(), x.end(), 1);
-            ImPlot::PlotLine("PA", x.data(), data[0].data(), data[0].size());
-            std::vector<float> smoothed = smooth(data[0],200);
-            ImPlot::PlotLine("PA (smoothed)", x.data(), smoothed.data(), smoothed.size());
-            std::iota(x.begin(), x.end(), 1);
-            ImPlot::PlotLine("P", x.data(), data[1].data(), data[1].size());
+    if (ImPlot::BeginPlot("Physical quantities")) 
+    {    
+        ImPlot::SetupAxisLimits(ImAxis_X1, 0, data[0].size(), ImPlotCond_Always);
+        ImPlot::SetupAxisLimits(ImAxis_Y1, 0, 1, ImPlotCond_Always);
+        std::vector<float> x(data[0].size());
+        std::iota(x.begin(), x.end(), 1);
+        ImPlot::PlotLine("PA", x.data(), data[0].data(), data[0].size());
+        std::vector<float> smoothed = smooth(data[0],200);
+        ImPlot::PlotLine("PA (smoothed)", x.data(), smoothed.data(), smoothed.size());
+        std::iota(x.begin(), x.end(), 1);
+        ImPlot::PlotLine("P", x.data(), data[1].data(), data[1].size());
+        ImPlot::EndPlot();
+    }
+
+    if (ImPlot::BeginPlot("P-A")) 
+    {
+        ImPlot::SetupAxis(ImAxis_X1, "Area");
+        ImPlot::SetupAxisLimits(ImAxis_X1, 0, 2, ImPlotCond_Always);
+        ImPlot::SetupAxis(ImAxis_Y1, "Pressure");
+        ImPlot::SetupAxisLimits(ImAxis_Y1, 0, 3);
+        ImPlot::PlotScatter("P-A", data[2].data(), data[1].data(), data[1].size());
+        ImPlot::PlotScatter("You are here", data[2].data() + data[2].size() - 1, data[1].data() + data[1].size() - 1, 1);
         ImPlot::EndPlot();
     }
 
