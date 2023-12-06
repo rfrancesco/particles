@@ -2,6 +2,7 @@
 #define GRAPHICS_HPP
 
 #include <SDL2/SDL.h>
+#include <vector>
 
 /* Graphics class
  * Creates a window and draws on it
@@ -26,6 +27,8 @@ class Graphics
         void circle(int x_center, int y_center, int radius, Color color);
         void render();
 
+        void renderImGuiWindow(std::vector<std::vector<float>> &data);
+
         int get_width();
         int get_height();
 
@@ -35,6 +38,9 @@ class Graphics
         SDL_Window* window;
         SDL_Renderer* renderer;
         SDL_Surface* window_surface;
+
+        SDL_Window* info_window;
+        SDL_Renderer* info_renderer;
 
         Color bg_color;
 };

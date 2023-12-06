@@ -4,7 +4,12 @@
 #include <vector>
 #include "Graphics.hpp"
 #include "SDLManager.hpp"
-
+#include "imgui.h"
+#include "backends/imgui_impl_sdl2.h"
+#include "backends/imgui_impl_sdlrenderer2.h"
+#include <implot.h>
+#include <numeric>
+#include <algorithm>
 
 static void if_true_crash(bool test, std::string msg)
 {
@@ -31,6 +36,29 @@ Graphics::Graphics()
     SDL_SetHint( SDL_HINT_RENDER_VSYNC, "2"  );
     clear_window();
     render();
+
+    info_window = SDL_CreateWindow("Particles!", SDL_WINDOWPOS_UNDEFINED,SDL_WINDOWPOS_UNDEFINED,
+                    600,400,window_flags);
+    if_true_crash(!info_window, "Could not create SDL Window!");
+    info_renderer = SDL_CreateRenderer(info_window,-1,SDL_RENDERER_ACCELERATED);
+    if_true_crash(!info_renderer, "Could not create SDL Renderer!");
+
+    int x, y, w, h;
+    SDL_GetWindowPosition(window,&x,&y);
+    SDL_GetWindowSize(window, &w, &h);
+    SDL_SetWindowPosition(window, x-w, y);
+    SDL_SetWindowPosition(info_window, x, y);
+
+    ImGui::CreateContext();
+    ImPlot::CreateContext();
+    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    //io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+
+    // Setup Dear ImGui style
+    ImGui::StyleColorsDark();
+    ImGui_ImplSDL2_InitForSDLRenderer(info_window, info_renderer);
+    ImGui_ImplSDLRenderer2_Init(info_renderer);
 }
 
 Graphics::~Graphics()
@@ -53,6 +81,86 @@ void Graphics::clear_window()
 void Graphics::render()
 {
     SDL_RenderPresent(renderer);
+}
+
+static std::vector<float> smooth(const std::vector<float> &in, unsigned int n)
+{
+    std::vector<float> out(in.size());
+    for (size_t i=0; i<in.size(); ++i)
+    {
+        size_t r = (i+n) < in.size() ? i+n : in.size()-1;
+        size_t l = ((i-n) < r) ? (i-n) : 0;    // size_t is unsigned!
+        size_t diff = r-l;
+
+        float avg = 0.;
+        for (;l<r;++l)
+            avg += in[r];
+        
+        out[i] = avg / diff;
+    }
+    std::cout << out[out.size()-1] <<std::endl;
+    return out;
+}
+
+static bool init=true;
+void Graphics::renderImGuiWindow(std::vector<std::vector<float>> &data)
+{
+    /* TODO: It would be nice to be able to "stream" data into a plot... */
+    ImGuiIO& io = ImGui::GetIO(); 
+    ImGui_ImplSDLRenderer2_NewFrame();
+    ImGui_ImplSDL2_NewFrame();
+
+    ImGui::NewFrame();
+    ImVec2 vec {0,0};
+    ImGui::SetNextWindowPos(vec);
+    int w, h;
+    SDL_GetWindowSize(info_window,&w, &h);
+    vec = ImVec2{w,h};
+    ImGui::SetNextWindowSize(vec);
+    ImGui::Begin("Plots");                        // Create a window called "Hello, world!" and append into it.
+    
+
+    if (ImPlot::BeginPlot("Physical quantities")) {
+       
+            ImPlot::SetupAxisLimits(ImAxis_X1, 0, data[0].size(), ImPlotCond_Always);
+            ImPlot::SetupAxisLimits(ImAxis_Y1, 0, 1);
+            std::vector<float> x(data[0].size());
+            std::iota(x.begin(), x.end(), 1);
+            ImPlot::PlotLine("PA", x.data(), data[0].data(), data[0].size());
+            std::vector<float> smoothed = smooth(data[0],200);
+            ImPlot::PlotLine("PA (smoothed)", x.data(), smoothed.data(), smoothed.size());
+            std::iota(x.begin(), x.end(), 1);
+            ImPlot::PlotLine("P", x.data(), data[1].data(), data[1].size());
+        ImPlot::EndPlot();
+    }
+
+    ImGui::End();
+
+    if (init)
+        ImGui::OpenPopup("Welcome");
+    
+    if (ImGui::BeginPopupModal("Welcome"))
+    {
+        std::cout << init << std::endl;
+        ImGui::Text("This is a simulation of a 2D ideal gas.\n"
+                    "Feel free to resize the main simulation window, to change its volume.\n"
+                    "Notice that (roughly) PA = const!\n\n"
+                    "Remember to let the system settle for a little while after resizing.\n"
+                    "Small volumes can lead to deviations from the ideal gas law.");
+        if (ImGui::Button("Ok!"))
+        {
+            init = false;
+            ImGui::CloseCurrentPopup();
+        }
+        ImGui::EndPopup();
+    }
+
+    ImGui::Render();
+    ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+    // SDL_RenderSetScale(info_renderer, io.DisplayFramebufferScale.x, io.DisplayFramebufferScale.y);
+    // SDL_SetRenderDrawColor(info_renderer, (Uint8)(clear_color.x * 255), (Uint8)(clear_color.y * 255), (Uint8)(clear_color.z * 255), (Uint8)(clear_color.w * 255));
+    ImGui_ImplSDLRenderer2_RenderDrawData(ImGui::GetDrawData());
+    SDL_RenderPresent(info_renderer);
 }
 
 int Graphics::get_width()

@@ -1,6 +1,8 @@
 #include "Input.hpp"
 #include "SDLManager.hpp"
 #include <iostream>
+#include "backends/imgui_impl_sdl2.h"
+#include "backends/imgui_impl_sdlrenderer2.h"
 
 Input::Input()
     : quitStatus{false}, windowResizeStatus{false}
@@ -14,6 +16,7 @@ void Input::pollInputEvents()
     beginNewFrame();
     while(SDL_PollEvent(&event))
     {
+        ImGui_ImplSDL2_ProcessEvent(&event);
         if (event.type == SDL_KEYDOWN)
             keyDownEvent(event);
         else if (event.type == SDL_KEYUP)
