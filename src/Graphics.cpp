@@ -185,8 +185,8 @@ void Graphics::renderImGuiWindow_plots(std::vector<std::vector<float>> &data)
         ImGui::Text("This is a simulation of a 2D ideal gas.\n"
                     "Feel free to resize the main simulation window, to change its volume.\n"
                     "Notice that, at equilibrium, PA = const!\n\n");
-        ImGui::Text("Remember that resizing the window brings the system out of equilibrium.\n"
-                    "After resizing, just wait a few seconds for the system to settle down.");
+        ImGui::Text("Remember that resizing the window brings the gas out of equilibrium.\n"
+                    "After resizing, just wait a few seconds for the gas to settle down.");
         if (ImGui::Button("Ok!"))
         {
             show_init_popup = false;
