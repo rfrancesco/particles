@@ -36,7 +36,7 @@ Graphics::Graphics()
     render();
 
     info_window = SDL_CreateWindow("Particles!", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-                                   600, 650, window_flags);
+                                   600, 670, window_flags);
     if_true_crash(!info_window, "Could not create SDL Window!");
     info_renderer = SDL_CreateRenderer(info_window, -1, SDL_RENDERER_ACCELERATED);
     if_true_crash(!info_renderer, "Could not create SDL Renderer!");
@@ -108,6 +108,12 @@ void Graphics::renderImGuiWindow_thermalization(unsigned int count, unsigned int
     ImGui_ImplSDL2_NewFrame();
 
     ImGui::NewFrame();
+    ImVec2 vec{0, 0};
+    ImGui::SetNextWindowPos(vec);
+    int w, h;
+    SDL_GetWindowSize(info_window, &w, &h);
+    vec = ImVec2{w, h};
+    ImGui::SetNextWindowSize(vec);
 
     ImGui::Begin("Plots");
     ImGui::OpenPopup("Thermalizing");
@@ -126,6 +132,8 @@ void Graphics::renderImGuiWindow_thermalization(unsigned int count, unsigned int
 }
 
 static bool show_init_popup = true;
+static bool model_is_locked = false;
+static float model_locked_pa = 0.0;
 void Graphics::renderImGuiWindow_plots(std::vector<std::vector<float>> &data)
 {
     ImGui_ImplSDLRenderer2_NewFrame();
@@ -140,10 +148,20 @@ void Graphics::renderImGuiWindow_plots(std::vector<std::vector<float>> &data)
     ImGui::SetNextWindowSize(vec);
     ImGui::Begin("Plots");
 
+    float max = 0;
+    float min = FLT_MAX;
+    for (int i = 0; i < 2; i++)
+    {
+        max = std::max(max, *std::max_element(data[i].begin(), data[i].end()));
+        min = std::min(min, *std::min_element(data[i].begin(), data[i].end()));
+    }
+    min *= 0.7;
+    max *= 1.2;
+
     if (ImPlot::BeginPlot("Physical quantities"))
     {
         ImPlot::SetupAxisLimits(ImAxis_X1, 0, data[0].size(), ImPlotCond_Always);
-        ImPlot::SetupAxisLimits(ImAxis_Y1, 0, 2, ImPlotCond_Always);
+        ImPlot::SetupAxisLimits(ImAxis_Y1, min, max, ImPlotCond_Always);
         std::vector<float> x(data[0].size());
         std::iota(x.begin(), x.end(), 1);
         ImPlot::SetupAxis(ImAxis_X1, "Time [frames]");
@@ -153,29 +171,54 @@ void Graphics::renderImGuiWindow_plots(std::vector<std::vector<float>> &data)
         // ImPlot::PlotLine("PA (smoothed)", x.data(), smoothed.data(), smoothed.size());
         std::iota(x.begin(), x.end(), 1);
         ImPlot::PlotLine("P", x.data(), data[1].data(), data[1].size());
+        if (model_is_locked)
+        {
+            std::vector<float> xmodel(2);
+            xmodel[0] = x[0];
+            xmodel[1] = x[x.size() - 1];
+            std::vector<float> model(xmodel.size(), model_locked_pa);
+            ImPlot::PlotLine("PA (locked)", xmodel.data(), model.data(), model.size());
+        }
         ImPlot::EndPlot();
     }
 
     if (ImPlot::BeginPlot("P-A"))
     {
         ImPlot::SetupAxis(ImAxis_X1, "Area");
-        ImPlot::SetupAxisLimits(ImAxis_X1, 0, *std::max_element(data[2].begin(), data[2].end()) * 2., ImPlotCond_Always);
+        ImPlot::SetupAxisLimits(ImAxis_X1, 0, *std::max_element(data[2].begin(), data[2].end()) * 1.5, ImPlotCond_Always);
         ImPlot::SetupAxis(ImAxis_Y1, "Pressure");
-        ImPlot::SetupAxisLimits(ImAxis_Y1, 0, *std::max_element(data[1].begin(), data[1].end()) * 2., ImPlotCond_Always);
+        ImPlot::SetupAxisLimits(ImAxis_Y1, 0, *std::max_element(data[1].begin(), data[1].end()) * 1.5, ImPlotCond_Always);
         ImPlot::PlotScatter("History", data[2].data(), data[1].data(), data[1].size());
         ImPlot::PlotScatter("You are here", data[2].data() + data[2].size() - 1, data[1].data() + data[1].size() - 1, 1);
-        float current_PA = data[2][data[2].size() - 1] * data[1][data[1].size() - 1];
+
+        float model_PA;
+        if (model_is_locked)
+            model_PA = model_locked_pa;
+        else
+            model_PA = data[2][data[2].size() - 1] * data[1][data[1].size() - 1];
         std::vector<float> xx, yy;
-        for (float x = 0.1; x < *std::max_element(data[2].begin(), data[2].end()) * 2.; x += 0.01)
+        for (float x = 0.01; x < *std::max_element(data[2].begin(), data[2].end()) * 1.5; x += 0.01)
         {
             xx.push_back(x);
-            yy.push_back(current_PA / x);
+            yy.push_back(model_PA / x);
         }
         ImPlot::PlotLine("Model", xx.data(), yy.data(), yy.size());
         ImPlot::EndPlot();
     }
 
-    ImGui::End();
+    if (!model_is_locked)
+    {
+        if (ImGui::Button("Lock model"))
+        {
+            model_is_locked = true;
+            model_locked_pa = data[2][data[2].size() - 1] * data[1][data[1].size() - 1];
+        }
+    }
+    else
+    {
+        if (ImGui::Button("Unlock model"))
+            model_is_locked = false;
+    }
 
     if (show_init_popup)
         ImGui::OpenPopup("Welcome");
@@ -195,6 +238,7 @@ void Graphics::renderImGuiWindow_plots(std::vector<std::vector<float>> &data)
         ImGui::EndPopup();
     }
 
+    ImGui::End();
     ImGui::Render();
     ImGui_ImplSDLRenderer2_RenderDrawData(ImGui::GetDrawData());
     SDL_RenderPresent(info_renderer);
