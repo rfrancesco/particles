@@ -2,6 +2,7 @@
 #define GRAPHICS_MONITORWINDOW_HPP
 
 #include <SDL2/SDL.h>
+#include "Graphics/SimulationWindow.hpp"
 #include <vector>
 
 constexpr int defaultCapacity{1000};
@@ -44,7 +45,7 @@ enum class MonitorWindowStatus
 class MonitorWindow
 {
 public:
-    MonitorWindow();
+    MonitorWindow(SimulationWindow& simulationWindow);
     ~MonitorWindow();
 
     MonitorWindowStatus status{MonitorWindowStatus::Thermalization};

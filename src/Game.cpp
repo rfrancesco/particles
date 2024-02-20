@@ -24,7 +24,7 @@ Game::~Game()
 void Game::gameLoop()
 {
     SimulationWindow simulationGraphics;
-    MonitorWindow monitorGraphics;
+    MonitorWindow monitorGraphics{simulationGraphics};
     Input input;
     bool running = true;
     GameLoopTimer frametimer;

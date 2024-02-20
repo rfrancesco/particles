@@ -57,7 +57,7 @@ static void if_true_crash(bool test, std::string msg)
     }
 }
 
-MonitorWindow::MonitorWindow()
+MonitorWindow::MonitorWindow(SimulationWindow& simulationWindow)
 {
     SDLManager::initSDLIfNotYetInitialized();
     Uint32 window_flags = SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL;
@@ -78,6 +78,12 @@ MonitorWindow::MonitorWindow()
     ImGui::StyleColorsDark();
     ImGui_ImplSDL2_InitForSDLRenderer(window, renderer);
     ImGui_ImplSDLRenderer2_Init(renderer);
+
+    int x, y, w, h;
+    SDL_GetWindowPosition(simulationWindow.window, &x, &y);
+    SDL_GetWindowSize(simulationWindow.window, &w, &h);
+    SDL_SetWindowPosition(simulationWindow.window, x - w, y);
+    SDL_SetWindowPosition(window, x, y);
 }
 
 MonitorWindow::~MonitorWindow()

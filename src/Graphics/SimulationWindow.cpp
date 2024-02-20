@@ -4,10 +4,6 @@
 #include <vector>
 #include "Graphics/SimulationWindow.hpp"
 #include "SDLManager.hpp"
-#include "imgui.h"
-#include "backends/imgui_impl_sdl2.h"
-#include "backends/imgui_impl_sdlrenderer2.h"
-#include <implot.h>
 #include <numeric>
 #include <algorithm>
 
