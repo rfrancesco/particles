@@ -23,7 +23,7 @@ public:
 private:
     Uint64 t_start, t_end;
     Uint64 t_physics_last, t_physics_now;
-    float current_fps;
+    double current_fps;
 };
 
 #endif

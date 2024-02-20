@@ -1,7 +1,7 @@
 #ifndef GAME_HPP
 #define GAME_HPP
 
-#include "Graphics.hpp"
+#include "Graphics/SimulationWindow.hpp"
 #include "GameObject.hpp"
 #include <vector>
 
@@ -20,7 +20,7 @@ private:
     std::vector<GameObject> objects;
 
     void gameLoop();
-    void draw(Graphics &graphics);
+    void draw(SimulationWindow &graphics);
 
     const int FPS = 60;
 };

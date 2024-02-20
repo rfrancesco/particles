@@ -30,15 +30,15 @@ double PhysicsEngine::getArea() const
     return world.area;
 }
 
-double PhysicsEngine::getVanDerWaalsArea(const std::vector<GameObject> &objects) const
-{
-    /* Double check that this makes sense...
-       At low densities the factor is irrelevant anyway, but at large densities? */
-    double a = world.area;
-    for (const auto &o : objects)
-        a -= 2 * M_PI * o.r * o.r;
-    return a;
-}
+// double PhysicsEngine::getVanDerWaalsArea(const std::vector<GameObject> &objects) const
+// {
+//     /* Double check that this makes sense...
+//        At low densities the factor is irrelevant anyway, but at large densities? */
+//     double a = world.area;
+//     for (const auto &o : objects)
+//         a -= 2 * M_PI * o.r * o.r;
+//     return a;
+// }
 
 double PhysicsEngine::getTotalKineticEnergy(const std::vector<GameObject> &objects) const
 {
