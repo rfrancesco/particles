@@ -27,8 +27,8 @@ SimulationWindow::SimulationWindow()
     if_true_crash(!renderer, "Could not create SDL Renderer!");
     window_surface = SDL_GetWindowSurface(window);
     if_true_crash(!window_surface, "Could not get SDL Surface from main window");
-    set_bg_color({255, 201, 211, 255});
-    clear_window();
+    setBackgroundColor({255, 201, 211, 255});
+    clearWindow();
     render();
 }
 
@@ -38,12 +38,12 @@ SimulationWindow::~SimulationWindow()
     SDL_DestroyWindow(window);
 }
 
-void SimulationWindow::set_bg_color(Color color)
+void SimulationWindow::setBackgroundColor(Color color)
 {
     bg_color = color;
 }
 
-void SimulationWindow::clear_window()
+void SimulationWindow::clearWindow()
 {
     SDL_SetRenderDrawColor(renderer, bg_color.r, bg_color.g, bg_color.b, 255);
     SDL_RenderClear(renderer);
@@ -73,14 +73,14 @@ void SimulationWindow::render()
 //     return out;
 // }
 
-int SimulationWindow::get_width()
+int SimulationWindow::getWidth()
 {
     int w, h;
     SDL_GetWindowSize(window, &w, &h);
     return w;
 }
 
-int SimulationWindow::get_height()
+int SimulationWindow::getHeight()
 {
     int w, h;
     SDL_GetWindowSize(window, &w, &h);

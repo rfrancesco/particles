@@ -15,14 +15,14 @@ public:
     SimulationWindow();
     ~SimulationWindow();
 
-    void set_bg_color(Color color);
-    void clear_window();
+    void setBackgroundColor(Color color);
+    void clearWindow();
     void rectangle(int x, int y, int w, int h);
     void circle(int x_center, int y_center, int radius, Color color);
     void render();
 
-    int get_width();
-    int get_height();
+    int getWidth();
+    int getHeight();
 
     void handleWindowResize();
 

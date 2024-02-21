@@ -32,18 +32,17 @@ void Game::gameLoop()
     double dt;
     unsigned long int count = 0;
     DataSmoother p{250}, a{250}, pa{250}, ke{250};
-    std::vector<double> vpa, vp, va;
 
-    for (int i = 0; i < 200; i++)
+    for (int i = 0; i < 500; i++)
     {
         objects.push_back(GameObject());
-        objects[i].pos = {rand() % simulationGraphics.get_width(), rand() % simulationGraphics.get_height()};
+        objects[i].pos = {rand() % simulationGraphics.getWidth(), rand() % simulationGraphics.getHeight()};
         objects[i].velocity = {rand() % 300 - 150, rand() % 300 - 150};
         objects[i].force = {0.0, 0.0};
         objects[i].r = 4;
     }
 
-    (void)frametimer.get_physics_dt();
+    (void)frametimer.getPhysicsDeltaTime();
     while (running)
     {
         count++;
@@ -51,10 +50,10 @@ void Game::gameLoop()
         input.pollInputEvents();
         running = !(input.wasQuitRequested());
         if (input.wasWindowResized())
-            physics.setWorldBox(simulationGraphics.get_width(), simulationGraphics.get_height());
+            physics.setWorldBox(simulationGraphics.getWidth(), simulationGraphics.getHeight());
 
-        dt = frametimer.get_physics_dt();
-        // physics.computeForces(objects);
+        dt = frametimer.getPhysicsDeltaTime();
+        physics.computeForces(objects);
         physics.evolveObjects(objects, dt);
         frametimer.end();
         // std::cout << "Time for logic:" << frametimer.elapsed_time() << std::endl;
@@ -79,8 +78,6 @@ void Game::gameLoop()
             double kinetic = ke.mean();
             area = a.mean();
 
-            std::cout << pressure << " " << area << std::endl;
-
             monitorGraphics.PA << pressurearea;
             monitorGraphics.pressure << pressure;
             monitorGraphics.area << area;
@@ -99,7 +96,7 @@ void Game::gameLoop()
 
 void Game::draw(SimulationWindow &simulationGraphics)
 {
-    simulationGraphics.clear_window();
+    simulationGraphics.clearWindow();
 
     // std::cout << "Objects" << std::endl;
     for (auto &object : objects)

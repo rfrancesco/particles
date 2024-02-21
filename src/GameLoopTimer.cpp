@@ -34,7 +34,7 @@ void GameLoopTimer::logFPS() const
     std::cout << "FPS = " << current_fps << std::endl;
 }
 
-double GameLoopTimer::get_physics_dt()
+double GameLoopTimer::getPhysicsDeltaTime()
 {
     double dt;
     t_physics_now = SDL_GetPerformanceCounter();

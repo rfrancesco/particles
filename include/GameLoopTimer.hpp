@@ -18,7 +18,7 @@ public:
     double elapsed_time();
     void capFPS(Uint64 max_fps);
     void logFPS() const;
-    double get_physics_dt();
+    double getPhysicsDeltaTime();
 
 private:
     Uint64 t_start, t_end;
